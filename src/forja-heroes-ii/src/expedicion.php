@@ -293,77 +293,115 @@ for ($b = 0; $b < BLOQUES_BARRA; $b++) {
     $barraParty .= ($b < $bloquesParty) ? '█' : '░';
 }
 
+// =====================================================================
+// A partir de aquí solo se PINTA: nada de cálculos, solo recorrer y mostrar.
+// =====================================================================
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Expedición · TODO nombre de la mazmorra · Forja de Héroes II</title>
+    <title>Expedición · <?= htmlspecialchars($nombreMazmorra) ?> · Forja de Héroes II</title>
     <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
 <main>
-    <span class="insignia">VARIANTE TODO</span>
-    <h1>TODO nombre de la mazmorra</h1>
-    <p class="subtitulo">Informe de expedición · líder: TODO</p>
+    <span class="insignia">VARIANTE <?= VARIANTE ?></span>
+    <h1><?= htmlspecialchars($nombreMazmorra) ?></h1>
+    <p class="subtitulo">Informe de expedición · líder: <?= $lider !== null ? htmlspecialchars($lider['nombre']) : 'ninguno (todos K.O.)' ?></p>
 
     <h2>La party</h2>
     <table>
         <tr><th>Héroe</th><th>Clase</th><th>Nivel</th><th>Vida</th><th>Daño</th><th>Poder</th><th>Posición</th><th>Estado</th></tr>
-        <!-- TODO R7: una fila por héroe con foreach: ... endforeach;
-             Estado en <td class="peligro"> si es K.O. o En peligro, y en
-             <td class="vida"> en otro caso (if: ... else: ... endif;) -->
-        <tr><td>TODO</td><td></td><td></td>
-            <td><span class="barra mini">TODO barra</span> vida/vidaMax</td>
-            <td></td><td></td><td></td><td></td></tr>
+        <?php foreach ($party as $heroe): ?>
+        <tr><td><?= htmlspecialchars($heroe['nombre']) ?></td><td><?= $heroe['clase'] ?></td><td><?= $heroe['nivel'] ?></td>
+            <td><span class="barra mini"><?= $heroe['barra'] ?></span> <?= $heroe['vida'] ?>/<?= $heroe['vidaMax'] ?></td>
+            <td><?= number_format($heroe['danio'], 1, ',', '.') ?></td><td><?= $heroe['poder'] ?></td><td><?= $heroe['posicion'] ?></td>
+            <?php if ($heroe['estado'] === 'K.O.' || $heroe['estado'] === 'En peligro'): ?>
+            <td class="peligro"><?= $heroe['estado'] ?></td>
+            <?php else: ?>
+            <td class="vida"><?= $heroe['estado'] ?></td>
+            <?php endif; ?>
+        </tr>
+        <?php endforeach; ?>
     </table>
 
     <div class="rejilla">
-        <div class="stat"><div class="etq">Poder total</div><div class="val">TODO</div></div>
-        <div class="stat"><div class="etq">Nivel medio</div><div class="val">TODO (1 decimal)</div></div>
-        <div class="stat"><div class="etq">Daño por ronda</div><div class="val">TODO (1 decimal)</div></div>
-        <div class="stat"><div class="etq">Héroes activos</div><div class="val">TODO / TODO</div></div>
+        <div class="stat"><div class="etq">Poder total</div><div class="val"><?= $poderParty ?></div></div>
+        <div class="stat"><div class="etq">Nivel medio</div><div class="val"><?= number_format($nivelMedio, 1, ',', '.') ?></div></div>
+        <div class="stat"><div class="etq">Daño por ronda</div><div class="val"><?= number_format($danioParty, 1, ',', '.') ?></div></div>
+        <div class="stat"><div class="etq">Héroes activos</div><div class="val"><?= $heroesActivos ?> / <?= count($party) ?></div></div>
     </div>
 
     <h2>Diario de la expedición</h2>
+    <p>Vida de la party al entrar: <?= $vidaEntrada ?> · tras las salas: <?= $vidaTrasSalas ?> (de <?= $vidaMaxParty ?>)</p>
     <ol class="diario">
-        <!-- TODO R7: un <li> por línea del diario -->
+        <?php foreach ($diario as $linea): ?>
+        <li><?= htmlspecialchars($linea) ?></li>
+        <?php endforeach; ?>
     </ol>
-    <p>Salas exploradas: TODO de TODO
-        <!-- TODO: solo si quedan salas sin explorar, mostrar cuántas en .peligro -->
-        · XP ganada: TODO</p>
+    <p>Salas exploradas: <?= $salasExploradas ?> de <?= count($salas) ?>
+        <?php if ($salasPendientes > 0): ?>
+        <span class="peligro">(<?= $salasPendientes ?> sin explorar)</span>
+        <?php endif; ?>
+        · XP ganada: <?= $xpGanada ?></p>
 
-    <h2>El jefe: TODO</h2>
-    <p>Vida TODO · ataque TODO · golpe de la party: TODO por ronda</p>
-    <!-- TODO R7: la tabla de rondas solo se muestra si hubo combate -->
+    <h2>El jefe: <?= htmlspecialchars($jefe['nombre']) ?></h2>
+    <p>Vida <?= $jefe['vida'] ?> · ataque <?= $jefe['ataque'] ?> · golpe de la party: <?= $golpe ?> por ronda</p>
+    <?php if (count($rondas) > 0): ?>
     <table>
         <tr><th>Ronda</th><th>Vida del jefe</th><th>Vida de la party</th></tr>
+        <?php foreach ($rondas as $fila): ?>
+        <tr><td><?= $fila['ronda'] ?></td><td><?= $fila['vidaJefe'] ?></td><td><?= $fila['vidaParty'] ?></td></tr>
+        <?php endforeach; ?>
     </table>
-    <p class="resultado TODO-vida-o-peligro"><strong>TODO resultado</strong> · TODO motivo</p>
-    <p class="barra vida">PARTY TODO barra vida/vidaMax</p>
+    <?php endif; ?>
+    <?php if ($resultado === 'Victoria'): ?>
+    <p class="resultado vida"><strong><?= $resultado ?></strong> · <?= htmlspecialchars($motivo) ?></p>
+    <?php else: ?>
+    <p class="resultado peligro"><strong><?= $resultado ?></strong> · <?= htmlspecialchars($motivo) ?></p>
+    <?php endif; ?>
+    <p class="barra vida">PARTY <?= $barraParty ?> <?= $vidaParty ?>/<?= $vidaMaxParty ?></p>
 
     <h2>Inventario</h2>
     <table>
         <tr><th>Objeto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
-        <!-- TODO R7: una fila por objeto del inventario ORDENADO -->
+        <?php foreach ($inventarioOrdenado as $objeto => $cantidad): ?>
+        <tr><td><?= htmlspecialchars($objeto) ?></td><td><?= $cantidad ?></td>
+            <td><?= number_format($precios[$objeto], 2, ',', '.') ?> mo</td>
+            <td><?= number_format($cantidad * $precios[$objeto], 2, ',', '.') ?> mo</td></tr>
+        <?php endforeach; ?>
     </table>
     <div class="rejilla">
-        <div class="stat"><div class="etq">Objetos</div><div class="val">TODO</div></div>
-        <div class="stat"><div class="etq">Valor del inventario</div><div class="val">TODO mo</div></div>
-        <div class="stat"><div class="etq">Oro final</div><div class="val">TODO mo</div></div>
-        <div class="stat"><div class="etq">Más abundante</div><div class="val peq">TODO</div></div>
+        <div class="stat"><div class="etq">Objetos</div><div class="val"><?= $totalObjetos ?></div></div>
+        <div class="stat"><div class="etq">Valor del inventario</div><div class="val"><?= number_format($valorInventario, 2, ',', '.') ?> mo</div></div>
+        <div class="stat"><div class="etq">Oro final</div><div class="val"><?= number_format($oro, 2, ',', '.') ?> mo</div></div>
+        <div class="stat"><div class="etq">Más abundante</div><div class="val peq"><?= htmlspecialchars((string) $objetoMasAbundante) ?></div></div>
     </div>
 
     <h2>Mapa de la mazmorra</h2>
-    <!-- TODO R7: tabla con foreach anidados (filas y celdas). Cada <td> lleva
-         la clase CSS de LEYENDA_MAPA[$celda][0] y el carácter dentro. -->
     <table class="mapa">
+        <?php foreach ($mapa as $fila): ?>
+        <tr>
+            <?php foreach ($fila as $celda): ?>
+            <td class="<?= LEYENDA_MAPA[$celda][0] ?? 'desconocida' ?>"><?= htmlspecialchars($celda) ?></td>
+            <?php endforeach; ?>
+        </tr>
+        <?php endforeach; ?>
     </table>
-    <p><!-- TODO: leyenda con el recuento de cada carácter --></p>
-    <!-- TODO: mensaje de coherencia del mapa (if: else: endif;) -->
+    <p>
+        <?php foreach ($conteoCeldas as $caracter => $veces): ?>
+        <code><?= htmlspecialchars((string) $caracter) ?></code> <?= LEYENDA_MAPA[$caracter][1] ?? 'Desconocida' ?>: <?= $veces ?> ·
+        <?php endforeach; ?>
+    </p>
+    <?php if ($mapaCoherente): ?>
+    <p class="vida">El mapa es coherente: tiene <?= $salasEnMapa ?> salas, las mismas que la expedición.</p>
+    <?php else: ?>
+    <p class="peligro">¡Ojo! El mapa tiene <?= $salasEnMapa ?> salas pero la expedición tiene <?= count($salas) ?>.</p>
+    <?php endif; ?>
 
-    <footer>Informe generado el TODO con PHP TODO · cada recarga lo recalcula todo desde cero.</footer>
+    <footer>Informe generado el <?= date('d/m/Y H:i:s') ?> con PHP <?= PHP_VERSION ?> · cada recarga lo recalcula todo desde cero.</footer>
 </main>
 </body>
 </html>
