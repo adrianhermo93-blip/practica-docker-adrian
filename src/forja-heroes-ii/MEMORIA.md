@@ -7,17 +7,48 @@
 
 ![Página completa](capturas/01-pagina-completa.png)
 
-## 0. Reparto del trabajo
+## 0. Reparto del trabajo y uso de ramas
 
-Hemos dividido `expedicion.php` por requisitos y cada parte está en su propia rama de git. Al final todas se han fusionado en la rama `ud3`.
+### 0.1 Reparto
 
-| Integrante | Ramas | Qué incluye |
-|---|---|---|
-| Alejandro Segundo Ganoza | `ud3-r2-party`, `ud3-r5-jefe` | R2/R3: cálculos de cada héroe (`match` del daño, estado con `if/elseif`, posición con `switch`, barras con `for`) y totales de la party · R5: combate contra el jefe con `while` y resultado con `match(true)` |
-| Adrián Hermida Moreno | `ud3-r4-expedicion`, `ud3-r9-memoria` | R4: recorrido de las salas con `switch`, `continue 2` y `break`, e inventario final · R9: memoria y capturas |
-| Raúl Crespo | `ud3-r6-mapa`, `ud3-r7-presentacion` | R6: recuento del mapa con `for` anidados y barra final · R7: todo el HTML con sintaxis alternativa |
+Hemos dividido `expedicion.php` por requisitos. Cada integrante se ha encargado de **dos partes**, y cada parte está en su propia rama de git:
+
+| Integrante | Ramas | Qué incluye | Líneas de código* |
+|---|---|---|---|
+| Alejandro Segundo Ganoza | `ud3-r2-party`, `ud3-r5-jefe` | R2/R3: cálculos de cada héroe (`match` del daño, estado con `if/elseif`, posición con `switch`, barras con `for`) y totales de la party · R5: combate contra el jefe con `while` y resultado con `match(true)` | 137 |
+| Raúl Crespo | `ud3-r6-mapa`, `ud3-r7-presentacion` | R6: recuento del mapa con `for` anidados y barra final · R7: todo el HTML con sintaxis alternativa | 127 |
+| Adrián Hermida Moreno | `ud3-r4-expedicion`, `ud3-r9-memoria` | R4: recorrido de las salas con `switch`, `continue 2` y `break`, e inventario final · R9: memoria y capturas | 80 + memoria |
+
+\* Líneas no vacías que aporta cada parte a `expedicion.php` (con comentarios).
+
+Además, Adrián ha hecho de **integrador** del repositorio: preparó la rama base `ud3` (kit de partida y variante B), fusionó cada rama en `ud3` y escribió el `README.md`. Por eso en el historial aparece con más commits, pero la mayoría son *merges* y no código:
+
+| Integrante | Commits de código | Commits de memoria / documentación | Commits de preparación | *Merges* | Total |
+|---|---|---|---|---|---|
+| Alejandro Segundo Ganoza | 2 | – | – | – | 2 |
+| Raúl Crespo | 2 | – | – | – | 2 |
+| Adrián Hermida Moreno | 1 | 4 | 2 | 8 | 15 |
+
+(Recuento en el momento de hacer las capturas del apartado 0.2. El commit que añade este apartado y su *merge* suman dos más a Adrián.)
 
 En la memoria, cada apartado lo ha preparado quien hizo la parte del código relacionada.
+
+### 0.2 Flujo de trabajo con ramas
+
+1. Se creó la rama `ud3` a partir de `main` (que contiene la UD2) y se añadió el kit de partida con la variante B.
+2. Cada integrante creó **su rama a partir de `ud3`** (`git checkout -b ud3-r2-party ud3`), hizo su parte y la subió (`git push`).
+3. El integrador fusionó cada rama en `ud3` con **`git merge --no-ff`**. Usamos `--no-ff` para que cada fusión quede como un commit propio y en el historial se vea qué aporta cada rama, en vez de quedar todo en una línea recta.
+4. `ud3` es la rama por defecto del repositorio en GitHub y contiene la versión final.
+
+Historial de la rama `ud3` (`git log --graph`): a la izquierda la línea principal con los *merges* y a la derecha cada rama con su autor:
+
+![Historial de ramas](capturas/08-git-historial-ramas.png)
+
+Ramas locales y remotas, commits por autor y quién ha hecho los *merges*:
+
+![Ramas y autores](capturas/09-git-ramas-y-autores.png)
+
+Repositorio: https://github.com/adrianhermo93-blip/practica-docker-adrian
 
 ## 1. Comprobación de resultados
 
