@@ -6,7 +6,7 @@
  *  Fichero SOLO PHP: sin etiqueta de cierre (PSR-12).
  *  Se carga desde expedicion.php con require_once.
  *
- *  @author  TODO (tu nombre)
+ *  @author  Adrián Hermida Moreno
  *  @version UD3
  */
 
@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 // Variante asignada en el aula virtual: 'A', 'B' o 'C'.
 // Decide qué fichero de datos se carga (inc/datos-A.php, ...).
-const VARIANTE = 'A';   // TODO: cambia 'A' por TU variante
+const VARIANTE = 'B';   // variante asignada: B · Las Minas de Hierro Negro
 
 // --- Reglas heredadas de la UD2 ---------------------------------------
 const XP_POR_NIVEL  = 400;   // experiencia necesaria por nivel
