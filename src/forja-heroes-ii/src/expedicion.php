@@ -3,46 +3,129 @@
  * =====================================================================
  *  expedicion.php · Forja de Héroes II · La party y la mazmorra
  * =====================================================================
- *  0613 DWES · UD3 · Tarea de refuerzo (sin nota)
- *  Autor/a: TODO · Variante: TODO
+ *  0613 DWES · UD3 · Tarea de refuerzo
  *
- *  Estructura OBLIGATORIA (como en el paso 09 del caso guiado):
+ *  @author   Adrián Hermida Moreno
+ *  @variante B · «Las Minas de Hierro Negro»
+ *  @version  UD3
+ *
+ *  Estructura (como en el paso 09 del caso guiado):
  *   1) strict_types y carga de inc/reglas.php y del fichero de datos
- *   2) CÁLCULOS: aquí arriba, sin HTML
+ *   2) CÁLCULOS: todo arriba, sin nada de HTML
  *   3) PRESENTACIÓN: HTML con sintaxis alternativa
  *      (foreach (...): ... endforeach;   if (...): ... else: ... endif;)
  *
- *  AHORA SÍ puedes usar if, switch, match, bucles y arrays.
- *  Todavía NO: funciones propias ni formularios (UD4).
- *
- *  R8 · Comenta cada bloque explicando QUÉ hace y POR QUÉ.
- *       Usa al menos una vez //, # y /* ... *\/.
+ *  Todos los resultados salen de los datos: si se cambia algo en
+ *  inc/datos-B.php y se recarga, el informe se recalcula entero.
  */
 
 declare(strict_types=1);
 
+// Primero las reglas (constantes) y luego los datos de la variante,
+// porque el nombre del fichero de datos depende de la constante VARIANTE.
 require_once __DIR__ . '/inc/reglas.php';
 require_once __DIR__ . '/inc/datos-' . VARIANTE . '.php';
-
 // =====================================================================
-// R2 · LA PARTY
+// R2 + R3 · LA PARTY
 // =====================================================================
-// TODO 2.1  Recorre $party con  foreach ($party as $i => $heroe)  y calcula
-//           para cada héroe: nivel, vidaMax (usa MULT_VIDA[clase]), pctVida.
-// TODO 2.2  (R3) Daño con match sobre la clase. SIN default (lee el enunciado).
-// TODO 2.3  (R3) Estado con if / elseif / else: K.O. · En peligro · Herido · En pie
-// TODO 2.4  (R3) Posición con switch: Guerrera y Clérigo → 'Primera línea'
-//           (casos agrupados), Pícara → 'Flanco', Hechicero → 'Retaguardia',
-//           default → 'Reserva'.
-// TODO 2.5  Barra de vida del héroe con un bucle for (prohibido str_repeat).
-// TODO 2.6  Guarda todo en la matriz: $party[$i]['nivel'] = ...; etc.
-//           Claves: nivel, vidaMax, pctVida, danio, poder, estado, posicion, barra
+/*
+ * Recorremos la party con clave ($i) para poder guardar los datos
+ * calculados DENTRO de la propia matriz ($party[$i][...]). Si solo
+ * usáramos $heroe, estaríamos modificando una copia y se perdería.
+ */
+foreach ($party as $i => $heroe) {
+    $nivel   = intdiv($heroe['xp'], XP_POR_NIVEL) + 1;
+    $vidaMax = VIDA_BASE + $heroe['constitucion'] * $nivel * MULT_VIDA[$heroe['clase']];
+    $pctVida = $heroe['vida'] / $vidaMax * 100;
 
-// TODO 2.7  Totales con array_sum + array_column: $vidaParty, $vidaMaxParty,
-//           $poderParty, y $nivelMedio (media).
-// TODO 2.8  Segundo foreach: $danioParty, $heroesActivos y $lider, saltando
-//           con continue a los héroes K.O. ($lider empieza valiendo null).
-// TODO 2.9  $hayPicara y $hayClerigo con in_array(..., ..., true).
+    // R3 · Daño con match SIN default: si llega una clase que no está
+    // contemplada, PHP lanza UnhandledMatchError y nos enteramos del fallo
+    // en vez de calcular un daño inventado.
+    $danio = match ($heroe['clase']) {
+        'Guerrera'  => $heroe['fuerza'] ** 2 / 10 + $nivel * 2,
+        'Hechicero' => $heroe['inteligencia'] * 3 + $nivel ** 2 / 4,
+        'Pícara'    => $heroe['destreza'] * 2 + $nivel ** 1.5,
+        'Clérigo'   => ($heroe['inteligencia'] + $heroe['constitucion']) * 1.5 + $nivel,
+    };
+
+    // R3 · Estado con if/elseif/else. El orden importa: primero el caso
+    // más grave (K.O.), porque una vez que una condición se cumple ya no
+    // se miran las siguientes.
+    if ($heroe['vida'] <= 0) {
+        $estado = 'K.O.';
+    } elseif ($pctVida < 35) {
+        $estado = 'En peligro';
+    } elseif ($pctVida < 70) {
+        $estado = 'Herido';
+    } else {
+        $estado = 'En pie';
+    }
+
+    # R3 · Posición con switch: Guerrera y Clérigo comparten resultado,
+    # así que se agrupan los dos case sin break entre ellos.
+    switch ($heroe['clase']) {
+        case 'Guerrera':
+        case 'Clérigo':
+            $posicion = 'Primera línea';
+            break;
+        case 'Pícara':
+            $posicion = 'Flanco';
+            break;
+        case 'Hechicero':
+            $posicion = 'Retaguardia';
+            break;
+        default:
+            $posicion = 'Reserva';
+    }
+
+    // Barra de vida con for (sin str_repeat): en cada vuelta se añade un
+    // bloque lleno o vacío según si todavía no hemos llegado a los llenos.
+    $bloquesLlenos = (int) round($pctVida / 100 * BLOQUES_BARRA);
+    $barra = '';
+    for ($b = 0; $b < BLOQUES_BARRA; $b++) {
+        $barra .= ($b < $bloquesLlenos) ? '█' : '░';
+    }
+
+    // Guardamos todo en la matriz para usarlo después en totales y en el HTML.
+    $party[$i]['nivel']    = $nivel;
+    $party[$i]['vidaMax']  = $vidaMax;
+    $party[$i]['pctVida']  = $pctVida;
+    $party[$i]['danio']    = $danio;
+    $party[$i]['poder']    = (int) round($danio * $nivel);
+    $party[$i]['estado']   = $estado;
+    $party[$i]['posicion'] = $posicion;
+    $party[$i]['barra']    = $barra;
+}
+
+// Totales de la party: array_column saca una "columna" de la matriz y
+// array_sum la suma, así no hace falta otro bucle para cada total.
+$vidaParty    = array_sum(array_column($party, 'vida'));
+$vidaMaxParty = array_sum(array_column($party, 'vidaMax'));
+$poderParty   = array_sum(array_column($party, 'poder'));
+$nivelMedio   = array_sum(array_column($party, 'nivel')) / count($party);
+$vidaEntrada  = $vidaParty; // la guardamos para el informe (vida al entrar)
+
+// Segundo recorrido: solo cuentan los héroes que siguen en pie. Con
+// continue saltamos a los K.O. y pasamos directamente al siguiente.
+$danioParty     = 0;
+$heroesActivos  = 0;
+$lider          = null; // todavía no sabemos quién es: empieza vacío
+foreach ($party as $heroe) {
+    if ($heroe['vida'] <= 0) {
+        continue;
+    }
+    $danioParty += $heroe['danio'];
+    $heroesActivos++;
+    if ($lider === null || $heroe['poder'] > $lider['poder']) {
+        $lider = $heroe;
+    }
+}
+
+// in_array con true (comparación estricta) para que no haya conversiones
+// raras de tipos. Estas dos variables deciden trampas y descansos.
+$clases     = array_column($party, 'clase');
+$hayPicara  = in_array('Pícara', $clases, true);
+$hayClerigo = in_array('Clérigo', $clases, true);
 
 // =====================================================================
 // R4 · LA EXPEDICIÓN (sala a sala)
