@@ -130,20 +130,76 @@ $hayClerigo = in_array('Clérigo', $clases, true);
 // =====================================================================
 // R4 · LA EXPEDICIÓN (sala a sala)
 // =====================================================================
-// TODO 4.1  Inicializa: $oro = $oroInicial, $xpGanada = 0, $diario = [],
-//           $salasExploradas = 0.
-// TODO 4.2  foreach ($salas as $n => $sala)  con un switch sobre $sala['tipo']:
-//             'vacía'    → línea en el diario y pasar a la SIGUIENTE SALA
-//                          (cuidado: continue dentro de switch... ¿1 o 2?)
-//             'trampa'   → si hay Pícara, se evita; si no, resta 'valor' de vida
-//             'combate'  → resta intdiv(valor, 4) de vida y suma 'valor' a la XP
-//             'tesoro'   → suma 'valor' al oro y, si la sala trae 'objeto',
-//                          añádelo al inventario (+1 unidad)
-//             'descanso' → cura 'valor' (el doble si hay Clérigo), sin pasar
-//                          de $vidaMaxParty (min)
-// TODO 4.3  Tras el switch: si $vidaParty <= 0 → vida a 0, línea en el diario
-//           y break.
-// TODO 4.4  $salasPendientes = salas totales − exploradas.
+// Valores de partida. PHP no recuerda nada entre peticiones, así que en
+// cada recarga la expedición vuelve a empezar desde la primera sala.
+$oro             = $oroInicial;
+$xpGanada        = 0;
+$diario          = [];
+$salasExploradas = 0;
+
+foreach ($salas as $n => $sala) {
+    // Contamos la sala al entrar: así las salas vacías también cuentan
+    // aunque luego salten directamente a la siguiente con continue 2.
+    $salasExploradas++;
+    $prefijo = 'Sala ' . ($n + 1) . ' · ' . $sala['nombre'] . ': ';
+
+    switch ($sala['tipo']) {
+        case 'vacía':
+            $diario[] = $prefijo . 'vacía, la party sigue avanzando.';
+            /* Dentro de un switch, "continue" a secas actúa como "break"
+               (solo sale del switch). Con "continue 2" saltamos al
+               foreach, que es el bucle que realmente queremos avanzar. */
+            continue 2;
+
+        case 'trampa':
+            if ($hayPicara) {
+                $diario[] = $prefijo . 'trampa desactivada por la Pícara.';
+            } else {
+                $vidaParty -= $sala['valor'];
+                $diario[] = $prefijo . '¡trampa! −' . $sala['valor'] . ' de vida.';
+            }
+            break;
+
+        case 'combate':
+            $perdida   = intdiv($sala['valor'], 4);
+            $vidaParty -= $perdida;
+            $xpGanada  += $sala['valor'];
+            $diario[] = $prefijo . 'combate, −' . $perdida . ' de vida y +' . $sala['valor'] . ' XP.';
+            break;
+
+        case 'tesoro':
+            $oro += $sala['valor'];
+            $linea = $prefijo . '+' . $sala['valor'] . ' mo';
+            // Solo algunas salas de tesoro traen objeto: lo comprobamos con
+            // isset para no provocar un Warning de clave inexistente.
+            if (isset($sala['objeto'])) {
+                $objeto = $sala['objeto'];
+                $inventario[$objeto] = ($inventario[$objeto] ?? 0) + 1;
+                $linea .= ' y «' . $objeto . '»';
+            }
+            $diario[] = $linea . '.';
+            break;
+
+        case 'descanso':
+            $cura = $hayClerigo ? $sala['valor'] * 2 : $sala['valor'];
+            // min() evita que la party se cure por encima de su vida máxima.
+            $vidaParty = min($vidaParty + $cura, $vidaMaxParty);
+            $diario[] = $prefijo . 'descanso, +' . $cura . ' de vida'
+                . ($hayClerigo ? ' (bendición del Clérigo).' : '.');
+            break;
+    }
+
+    // Después de cada sala comprobamos si la party ha caído. Si es así,
+    // break corta el foreach y el resto de salas quedan sin explorar.
+    if ($vidaParty <= 0) {
+        $vidaParty = 0;
+        $diario[] = 'La party cae en la sala ' . ($n + 1) . '. Fin de la expedición.';
+        break;
+    }
+}
+
+$vidaTrasSalas   = $vidaParty;
+$salasPendientes = count($salas) - $salasExploradas;
 
 // =====================================================================
 // R5 · EL JEFE
@@ -164,9 +220,20 @@ $hayClerigo = in_array('Clérigo', $clases, true);
 // =====================================================================
 // R4 (cont.) · INVENTARIO FINAL
 // =====================================================================
-// TODO 4.5  foreach con clave => valor: $valorInventario (cantidad × precio).
-// TODO 4.6  $totalObjetos (array_sum). Copia del inventario ordenada de mayor
-//           a menor cantidad CONSERVANDO las claves. $objetoMasAbundante.
+// Se calcula al final para que incluya los objetos encontrados en las salas.
+$valorInventario = 0.0;
+foreach ($inventario as $objeto => $cantidad) {
+    $valorInventario += $cantidad * $precios[$objeto];
+}
+
+$totalObjetos = array_sum($inventario);
+
+// arsort ordena de mayor a menor CONSERVANDO las claves (sort las perdería
+// y nos quedaríamos sin saber qué objeto es cada cantidad). Lo hacemos
+// sobre una copia para no tocar el inventario original.
+$inventarioOrdenado = $inventario;
+arsort($inventarioOrdenado);
+$objetoMasAbundante = array_key_first($inventarioOrdenado);
 
 // =====================================================================
 // R6 · EL MAPA
