@@ -5,7 +5,9 @@
  * =====================================================================
  *  0613 DWES · UD3 · Tarea de refuerzo
  *
- *  @author   Adrián Hermida Moreno
+ *  @author   Adrián Hermida Moreno   (R4 · expedición e inventario)
+ *  @author   Alejandro Segundo Ganoza (R2/R3 · party · R5 · jefe)
+ *  @author   Raúl Crespo             (R6 · mapa · R7 · presentación)
  *  @variante B · «Las Minas de Hierro Negro»
  *  @version  UD3
  *

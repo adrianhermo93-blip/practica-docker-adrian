@@ -7,6 +7,8 @@
  *  Se carga desde expedicion.php con require_once.
  *
  *  @author  Adrián Hermida Moreno
+ *  @author  Alejandro Segundo Ganoza
+ *  @author  Raúl Crespo
  *  @version UD3
  */
 
