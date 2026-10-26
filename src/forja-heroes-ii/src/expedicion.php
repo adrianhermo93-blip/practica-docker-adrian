@@ -271,10 +271,27 @@ $objetoMasAbundante = array_key_first($inventarioOrdenado);
 // =====================================================================
 // R6 · EL MAPA
 // =====================================================================
-// TODO 6.1  Dos for anidados (filas y columnas, con count) para contar cuántas
-//           veces aparece cada carácter: $conteoCeldas[$celda] = (… ?? 0) + 1;
-// TODO 6.2  ¿El número de 'S' coincide con count($salas)? → $mapaCoherente
-// TODO 6.3  Barra de vida de la party con for.
+// Dos for anidados: el de fuera recorre filas y el de dentro las columnas
+// de cada fila. El ?? 0 evita el Warning la primera vez que sale un carácter.
+$conteoCeldas = [];
+for ($f = 0; $f < count($mapa); $f++) {
+    for ($c = 0; $c < count($mapa[$f]); $c++) {
+        $celda = $mapa[$f][$c];
+        $conteoCeldas[$celda] = ($conteoCeldas[$celda] ?? 0) + 1;
+    }
+}
+
+// El mapa es coherente si tiene tantas 'S' como salas hay en los datos.
+$salasEnMapa   = $conteoCeldas['S'] ?? 0;
+$mapaCoherente = ($salasEnMapa === count($salas));
+
+// Barra de vida final de la party (después de las salas y del jefe).
+$pctVidaParty   = $vidaParty / $vidaMaxParty * 100;
+$bloquesParty   = (int) round($pctVidaParty / 100 * BLOQUES_BARRA);
+$barraParty     = '';
+for ($b = 0; $b < BLOQUES_BARRA; $b++) {
+    $barraParty .= ($b < $bloquesParty) ? '█' : '░';
+}
 
 ?>
 <!DOCTYPE html>
