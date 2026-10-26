@@ -204,18 +204,51 @@ $salasPendientes = count($salas) - $salasExploradas;
 // =====================================================================
 // R5 · EL JEFE
 // =====================================================================
-// TODO 5.1  $tieneLlave con array_key_exists($jefe['llave'], $inventario).
-//           $golpe = daño de la party redondeado a int.
-// TODO 5.2  if / elseif / else:
-//             party sin vida      → 'Derrota' (no llegó)
-//             sin llave           → 'Puerta sellada'
-//             en otro caso        → combate con while:
-//               mientras jefe > 0 Y party > 0 Y ronda < MAX_RONDAS:
-//                 ronda++; el jefe recibe $golpe (mínimo 0);
-//                 si el jefe sigue vivo, la party recibe su 'ataque' (mínimo 0);
-//                 añade la fila a $rondas[] = ['ronda'=>…, 'vidaJefe'=>…, 'vidaParty'=>…]
-//               $resultado con match(true): Victoria · Derrota · Retirada
-//               Si es Victoria, suma la recompensa al oro.
+// El golpe de la party es su daño total redondeado a entero, y la llave
+// se busca como CLAVE del inventario (objeto => cantidad).
+$tieneLlave = array_key_exists($jefe['llave'], $inventario);
+$golpe      = (int) round($danioParty);
+$vidaJefe   = $jefe['vida'];
+$rondas     = [];
+$ronda      = 0;
+
+if ($vidaParty <= 0) {
+    $resultado = 'Derrota';
+    $motivo    = 'la party no llegó a la guarida del jefe.';
+} elseif (!$tieneLlave) {
+    $resultado = 'Puerta sellada';
+    $motivo    = 'sin «' . $jefe['llave'] . '» no se puede entrar.';
+} else {
+    /* Combate por rondas con while porque no sabemos cuántas vueltas va a
+       dar: depende de la vida de los dos. MAX_RONDAS es el tope para que
+       el bucle nunca sea infinito (por ejemplo, si el golpe fuera 0). */
+    while ($vidaJefe > 0 && $vidaParty > 0 && $ronda < MAX_RONDAS) {
+        $ronda++;
+        $vidaJefe = max(0, $vidaJefe - $golpe);
+        // Si el jefe ha caído en esta ronda ya no contraataca.
+        if ($vidaJefe > 0) {
+            $vidaParty = max(0, $vidaParty - $jefe['ataque']);
+        }
+        $rondas[] = ['ronda' => $ronda, 'vidaJefe' => $vidaJefe, 'vidaParty' => $vidaParty];
+    }
+
+    # match(true): se queda con el primer brazo cuya condición sea cierta.
+    $resultado = match (true) {
+        $vidaJefe <= 0  => 'Victoria',
+        $vidaParty <= 0 => 'Derrota',
+        default         => 'Retirada',
+    };
+
+    $motivo = match ($resultado) {
+        'Victoria' => 'en la ronda ' . $ronda . ', +' . $jefe['recompensa'] . ' mo de recompensa.',
+        'Derrota'  => 'la party cae en la ronda ' . $ronda . '.',
+        'Retirada' => 'tras ' . $ronda . ' rondas el jefe sigue en pie con ' . $vidaJefe . ' de vida.',
+    };
+
+    if ($resultado === 'Victoria') {
+        $oro += $jefe['recompensa'];
+    }
+}
 
 // =====================================================================
 // R4 (cont.) · INVENTARIO FINAL
