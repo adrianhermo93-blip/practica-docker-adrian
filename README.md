@@ -6,7 +6,7 @@ Contiene **tres ejercicios** que comparten el mismo entorno Docker:
 | # | Ejercicio | Unidad | Tipo | Autoría | Dónde está |
 |---|---|---|---|---|---|
 | 1 | Entorno Docker (Nginx + PHP 8.3 + MySQL) | Práctica inicial | Individual | Adrián Hermida Moreno | Raíz: `docker-compose.yml`, `nginx/`, `php/Dockerfile` |
-| 2 | Forja de Héroes · ficha del héroe | UD2 | Individual | Adrián Hermida Moreno | Raíz: `LEEME.md`, `MEMORIA.md`, `capturas/`, `php/forja.ini` y `src/` (salvo `src/forja-heroes-ii/`) |
+| 2 | Forja de Héroes · ficha del héroe | UD2 | Individual | Adrián Hermida Moreno | Raíz: `MEMORIA.md`, `capturas/`, `php/forja.ini` y `src/` (salvo `src/forja-heroes-ii/`) |
 | 3 | **Forja de Héroes II** · la party y la mazmorra | UD3 | **Grupal** | Adrián Hermida Moreno · Alejandro Segundo Ganoza · Raúl Crespo | [`src/forja-heroes-ii/`](src/forja-heroes-ii/) |
 
 ---
@@ -24,7 +24,6 @@ practica-docker-adrian/
 ├── php/Dockerfile                ← imagen PHP 8.3-FPM con pdo_mysql
 │
 │   ── 2 · UD2 · FORJA DE HÉROES ───────────────────────────────────
-├── LEEME.md                      ← instrucciones del kit de la UD2
 ├── MEMORIA.md                    ← memoria de la UD2
 ├── capturas/                     ← capturas de la UD2
 ├── php/forja.ini                 ← directivas PHP de desarrollo (UD2)
@@ -36,7 +35,6 @@ practica-docker-adrian/
     │
     │   ── 3 · UD3 · FORJA DE HÉROES II (GRUPAL) ──────────────────
     └── forja-heroes-ii/
-        ├── LEEME.md              ← instrucciones del kit de la UD3
         ├── MEMORIA.md            ← memoria de la UD3 (con el reparto del trabajo)
         ├── capturas/             ← capturas de la UD3
         └── src/
@@ -83,7 +81,6 @@ El objetivo de esta práctica es montar un entorno web utilizando Docker en luga
 
 Generador de la ficha de un héroe (variante B · Aldric «el Arcano»): cálculo de nivel, vida, daño y poder a partir de los datos de `src/inc/heroe.php`.
 
-- Instrucciones: [`LEEME.md`](LEEME.md)
 - Memoria: [`MEMORIA.md`](MEMORIA.md)
 
 ---

@@ -123,11 +123,11 @@ $barraXp = str_repeat('█', $bloquesXp)
 </head>
 <body>
 <main>
-    <!-- TODO: insignia VETERANO/NOVATO, usando la etiqueta LARGA con echo -->
+    <?php // Insignia VETERANO/NOVATO con la etiqueta larga y echo ?>
     <?php echo $esVeterano
       ? '<span class="insignia">VETERANO</span>'
       : '<span class="insignia">NOVATO</span>'; ?>
-    <!-- TODO: a partir de aquí, usa la etiqueta CORTA de salida -->
+    <?php // A partir de aquí, etiqueta corta de salida ?>
     <h1><?= htmlspecialchars($nombreHeroe) ?></h1>
     <p class="subtitulo">
 <?= CLASE_HEROE ?> ·
