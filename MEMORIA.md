@@ -4,8 +4,6 @@ Alumno/a: Adrian Hermida Moreno  · **Variante:** B  · **Fecha:** 7 Octubre
 
 ## 1. Comprobación de resultados (CE 2.e)
 
-Rellena la tabla con los valores que muestra TU ficha y compáralos con la tabla de comprobación del enunciado.
-
 | Dato | Valor esperado (enunciado) | Valor de mi ficha | ¿Coincide? |
 ---------------------------------------------------------------------
 | Nivel|  8                         |  8                |   Si       |
